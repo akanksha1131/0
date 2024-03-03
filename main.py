@@ -19,5 +19,4 @@ positive_prob = blob.sentiment.p_pos
 negative_prob = blob.sentiment.p_neg
 
 print("\n\nSentiment:", classification)
-print("Positive probability:", positive_prob)
-print("Negative probability:", negative_prob)
+
