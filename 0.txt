@@ -1,11 +1,27 @@
 1.	Generate RSA Private Key:
 openssl genpkey -algorithm RSA -out private_key.pem -aes256
+
 2.	Extract RSA Public Key from Private Key:
 openssl rsa -pubout -in private_key.pem -out public_key.pem
+
 3.	Encrypt Data using RSA Public Key:
 openssl rsautl -encrypt -pubin -inkey public_key.pem -in plaintext.txt -out encrypted_data.enc
+
 4.	Decrypt Data using RSA Private Key:
 openssl rsautl -decrypt -inkey private_key.pem -in encrypted_data.enc -out decrypted_data.txt
+
+
+To generate RSA key pair using OpenSSL:
+openssl genpkey -algorithm RSA -out private_key.pem -aes256 -pass pass:password
+
+To extract the public key from the private key:
+openssl rsa -in private_key.pem -pubout -out public_key.pem
+
+To generate a digital signature using OpenSSL:
+openssl dgst -sha256 -sign private_key.pem -out signature.sha256 data.txt
+
+To verify a digital signature using OpenSSL:
+openssl dgst -sha256 -verify public_key.pem -signature signature.sha256 data.txt
 
 
 Certainly! To encrypt or decrypt using AES with OpenSSL, you can use the following commands in your terminal:
@@ -57,6 +73,137 @@ openssl sha256 filename.txt
 
 
 
+
+Generate DH Parameters: First, generate the Diffie-Hellman parameters if you haven't already done so.
+openssl dhparam -out dhparams.pem 2048
+
+Generate Private Key and Public Key for Party A: Generate the private key and corresponding public key for Party A.
+
+openssl genpkey -paramfile dhparams.pem -out partyA_key.pem
+openssl pkey -in partyA_key.pem -pubout -out partyA_pubkey.pem
+
+Generate Private Key and Public Key for Party B: Similarly, generate the private key and corresponding public key for Party B.
+
+openssl genpkey -paramfile dhparams.pem -out partyB_key.pem
+openssl pkey -in partyB_key.pem -pubout -out partyB_pubkey.pem
+
+Exchange Public Keys: Exchange public keys between Party A and Party B securely.Derive Shared Secret for Party A: Party A computes the shared secret using their private key and Party B's public key.
+openssl pkeyutl -derive -inkey partyA_key.pem -peerkey partyB_pubkey.pem -out shared_secret.bin
+
+Derive Shared Secret for Party B: Party B computes the shared secret using their private key and Party A's public key.
+openssl pkeyutl -derive -inkey partyB_key.pem -peerkey partyA_pubkey.pem -out shared_secret.bin
+
+////////////////////////////////
+import java.util.Scanner;
+
+public class DiffieHillmanNormal {
+    public static void main(String[] args) {
+        long n=13;
+        long g=6;
+        long prA=5;
+        long prB=4;
+        long pubA=2;
+        long pubB=9;
+        long sharedA=modPow(pubB,prA,n);
+        long sharedB=modPow(pubA, prB,n);
+        System.out.println(sharedB+", "+sharedA);
+
+    }
+
+    private static long acceptLong() {
+        Scanner sc =new Scanner(System.in);
+        System.out.println("Enter Long:\n");
+        return sc.nextLong();
+    }
+
+    private static long modPow(long base, long exp, long modulus) {
+        long result = 1;
+        while (exp > 0) {
+            if(exp%2==1){
+                result=(result*base)%modulus;
+                exp--;
+            }
+            else{
+                base=(base*base)%modulus;
+                exp/=2;
+
+            }
+
+        }
+        return result;
+    }
+}
+
+////////////////////////////////
+public class RsaNormal {
+    public static void main(String[] args) {
+        int p = 5, q = 17;
+        int n = p * q;
+        int m = (p - 1) * (q - 1);
+        System.out.println("m=" + m);
+        int e = 0;
+        for (int i = 2; i < m; i++) {
+            if (gcd(i, m) == 1) {
+                e = i;
+                break;
+            }
+        }
+        e = 5;
+        int d = modInverse(e, m);
+        System.out.println("e=" + e);
+        System.out.println("d=" + d);
+        int input = 7;
+        int encrypted = modPow(input, e, n);
+        System.out.println("encrypted=" + encrypted);
+        int decrypted = modPow(encrypted, d, n);
+        System.out.println("decrypted=" + decrypted);
+    }
+
+    private static int gcd(int a, int b) {
+        if (b == 0) {
+            return a;
+        }
+        return gcd(b, a % b);
+    }
+
+    private static int modInverse(int b, int m) {
+        int k=m;
+        //find b inverse mod m
+        int q=0,t1=0,t2=1,t3=0,r=0;
+        while(b>0){
+            q=m/b;
+            r=m%b;
+            t3=t1-(q*t2);
+            t1=t2;
+            t2=t3;
+            m=b;
+            b=r;
+
+        }
+        if(t1<0){
+            t1+=k;
+        }
+        return t1;
+    }
+
+    private static int modPow(int base, int exp, int modulus) {
+        int result = 1;
+        while (exp > 0) {
+            if(exp%2==1){
+                result=(result*base)%modulus;
+                exp--;
+            }
+            else{
+                base=(base*base)%modulus;
+                exp/=2;
+
+            }
+
+        }
+        return result;
+    }
+}
+////////////////////////////////
 ////////////////////////////////
 
 
